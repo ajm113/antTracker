@@ -1,0 +1,6 @@
+language: go
+
+branches:
+  only:
+    - master
+    - travis
