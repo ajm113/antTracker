@@ -1,0 +1,5 @@
+PROTOCOL="tcp"
+PORT="1337"
+HOST=""
+NAME="antTracker Server"
+TIMEOUT=10
