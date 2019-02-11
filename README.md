@@ -9,6 +9,12 @@
 - Works with major SQL servers.
 - Works with populare key value databases such as Redis and Memcached.
 
+# Supported Architectures
+
+- Linux
+- FreeBSD 10.3 or later
+- Darwin/macOS
+- Windows 7, Server 2008R2 or later. **(unsupported testing)**
 
 # TODO:
 
