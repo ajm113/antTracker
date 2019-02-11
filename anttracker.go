@@ -25,7 +25,7 @@ func main() {
 	  }
 
 	// Let the user know the server is starting and setup.
-	e.Logger.Info("Starting " + Getenv("NAME", "antTracker") + "...")
+	e.Logger.Info("Starting " + getenv("NAME", "antTracker") + "...")
 
 	// Setup custom server based on our env values.
 	antrackerServer := &http.Server {
@@ -34,8 +34,8 @@ func main() {
 	}
 
 	l, _ := net.Listen(
-		Getenv("PROTOCOL", "tcp"),
-		Getenv("HOST", "") + ":" + Getenv("PORT", "1337"),
+		getenv("PROTOCOL", "tcp"),
+		getenv("HOST", "") + ":" + getenv("PORT", "1337"),
 	)
 	e.Listener = l
 	e.HideBanner = true
@@ -44,11 +44,13 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
 
+	e.GET("/", handleAnnounce)
+
 	// We create a function for graceful shutdown if for some reason
 	// our antTracker is in the middle of a transaction or request.
 	go func() {
 		if err := e.StartServer(antrackerServer); err != nil {
-			e.Logger.Info("Gracefully shutting down " + Getenv("NAME", "antTracker"))
+			e.Logger.Info("Gracefully shutting down " + getenv("NAME", "antTracker"))
 		}
 	}()
 
