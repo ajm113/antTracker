@@ -18,8 +18,7 @@
 
 # TODO:
 
-- Write simple SQL query builder for Postgres, SQLite, MySQL.
-- Write simple cache builder for Memcached, and Redis.
+- Write setup scripts for database.
 - Create Dockerfile.
 - Write routes.
 - Create Announcement.
