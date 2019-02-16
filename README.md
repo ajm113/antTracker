@@ -6,8 +6,10 @@
 
 - Faster setup and execution! Simply add executable, and .env file and you are running!
 - Tiny and lightweight! Even run it on a pi server!
-- Works with major SQL servers.
+- Works with major SQL databases (MySQL, MariaDB, Postgres, SQLite3).
 - Works with populare key value databases such as Redis and Memcached.
+- Multiplatform
+- MIT Licensed! Use it for anything you want! Personal or commercially!
 
 # Supported Architectures
 
@@ -18,6 +20,7 @@
 
 # TODO:
 
+- Write unit tests.
 - Write setup scripts for database.
 - Create Dockerfile.
 - Write routes.
