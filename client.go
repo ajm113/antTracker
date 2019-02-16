@@ -55,7 +55,7 @@ func Open(db ConnectionOptions, co ConnectionOptions) (c *Client, err error) {
 // Close Closes our cache and database instance.
 func (c *Client) Close() {
 	c.DBClient.Close()
-	c.CacheClient.Close()
+	closeCacheConnection(c.CacheClient)
 }
 
 // Query Sends a query to cache first, and fallsback to db if connection fails

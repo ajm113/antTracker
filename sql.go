@@ -17,7 +17,7 @@ const (
 	PG DatabaseDriverType = 2
 )
 
-func databaseDriverTypeStringToInt(t string) (ct CacheDriverType, err error) {
+func databaseDriverTypeStringToInt(t string) (ct DatabaseDriverType, err error) {
 	switch (t) {
 	case "sqlite3":
 		ct = SQLITE3
@@ -41,7 +41,7 @@ func databaseDriverTypeToString(t DatabaseDriverType) (ct string, err error) {
 	case PG:
 		ct = "postgres"
 	default:
-		err = errors.New("Database driver " + t + " is unsupported!")
+		err = errors.New("Database driver is unsupported!")
 	}
 
 	return
@@ -57,18 +57,26 @@ func createConnectionStringByDatabaseDriverType(t DatabaseDriverType, host, port
 		return "postgres://" + username + ":" + password + "@" +
 			host + ":" + port + " /" + database + "?sslmode=verify-full"
 	}
+
+	return ""
 }
 
 func connectToDatabaseServer(dbType, host, port, username, password, database string) (db *sql.DB, err error) {
 
-	t, err = databaseDriverTypeStringToInt(dbType)
+	t, err := databaseDriverTypeStringToInt(dbType)
+
+	if err != nil {
+		return
+	}
+
+	sqlDriverName, err := databaseDriverTypeToString(t)
 
 	if err != nil {
 		return
 	}
 
 	db, err = sql.Open(
-		databaseDriverTypeToString(t),
+		sqlDriverName,
 		createConnectionStringByDatabaseDriverType(t, host, port, username, password, database),
 	)
 	return

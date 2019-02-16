@@ -26,12 +26,19 @@ func cacheTypeStringToInt(t string) CacheDriverType {
 	}
 }
 
+func closeCacheConnection(client interface{}) {
+	switch c := client.(type) {
+	case *redis.Client:
+		c.Close()
+	}
+}
+
 func connectToCacheServer(cacheType, host, port, password, database string) (c interface{}, err error) {
 	switch (cacheTypeStringToInt(cacheType)) {
 	case DUMMY:
 		return
 	case REDIS:
-		db, err := strconv.Atoi(database)
+		db, _ := strconv.Atoi(database)
 
 		c = redis.NewClient(&redis.Options{
 			Addr: host + ":" + port,
