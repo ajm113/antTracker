@@ -1,66 +1,80 @@
 package main
 
-import "database/sql"
-
-type ConnectionOptions struct {
-	Driver string
-	Host string
-	Port string
-	Username string
-	Password string
-	Database string
-}
+import (
+	"database/sql"
+	"crypto/sha1"
+	"io"
+	"fmt"
+)
 
 type Client struct {
-	DatabaseDriver DatabaseDriverType
-	CacheDriver CacheDriverType
-	DBClient *sql.DB
-	CacheClient interface{}
-	// Should ONLY be used in rare edge cases!
-	UseCache bool
+	HashID string
+	IP string
+	PeerID string
+	Port string
+	Expires int64
+	InfoHash string
+	UserAgent string
+	Key string
+	IsSeeder bool
 }
 
-// Open Creates the cache and db instance.
-func Open(db ConnectionOptions, co ConnectionOptions) (c *Client, err error) {
-
-	// First lets setup the connection for cache.
-	c.CacheClient, err = connectToCacheServer(
-		co.Driver,
-		co.Host,
-		co.Port,
-		co.Password,
-		co.Database,
-	)
-
-	if err != nil {
-		return
+func GetClientByHashId(db *sql.DB, h string) (c Client, err error) {
+	rows, err := db.Query(`
+	SELECT
+		hashid,
+		ip,
+		peerid,
+		port,
+		expires,
+		infohash,
+		useragent,
+		hashKey,
+		isSeeder
+	FROM clients
+	WHERE hashid=?
+	LIMIT 1
+	`, h)
+	defer rows.Close()
+	for rows.Next() {
+		err = rows.Scan(
+			&c.HashID,
+			&c.IP,
+			&c.PeerID,
+			&c.Port,
+			&c.Expires,
+			&c.InfoHash,
+			&c.UserAgent,
+			&c.Key,
+			&c.IsSeeder,
+		)
 	}
-
-	c.DBClient, err = connectToDatabaseServer(
-		db.Driver,
-		db.Host,
-		db.Port,
-		db.Username,
-		db.Password,
-		db.Database,
-	)
-
-	if err != nil {
-		return
-	}
+	err = rows.Err()
 
 	return
 }
 
-// Close Closes our cache and database instance.
-func (c *Client) Close() {
-	c.DBClient.Close()
-	closeCacheConnection(c.CacheClient)
+func InsertOrUpdateClient(db *sql.DB, c Client) (rc Client, err error) {
+
+	return
 }
 
-// Query Sends a query to cache first, and fallsback to db if connection fails
-// or the key simply doesn't exist.
-func (c *Client) Query() {
+func RemoveClient(db *sql.DB, c Client) (err error) {
+	_, err = db.Exec(`
+		DELETE FROM clients WHERE hashid=? LIMIT 1
+	`, c.HashID)
 
+	return
 }
 
+func GetClients(db *sql.DB) (c[] Client, err error) {
+	return
+}
+
+func CreateHashIdIntoClient(c Client) (r Client) {
+	h := sha1.New()
+	io.WriteString(h, c.PeerID + c.InfoHash)
+	c.HashID = fmt.Sprintf("% x", h.Sum(nil))
+	r = c
+	return
+}

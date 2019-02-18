@@ -27,6 +27,8 @@ func main() {
 	// Let the user know the server is starting and setup.
 	e.Logger.Info("Starting " + getenv("NAME", "antTracker") + "...")
 
+	setupDatabase()
+
 	// Setup custom server based on our env values.
 	antrackerServer := &http.Server {
 		ReadTimeout:    10 * time.Second,

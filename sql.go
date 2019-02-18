@@ -17,6 +17,15 @@ const (
 	PG DatabaseDriverType = 2
 )
 
+type ConnectionOptions struct {
+	Driver string
+	Host string
+	Port string
+	Username string
+	Password string
+	Database string
+}
+
 func databaseDriverTypeStringToInt(t string) (ct DatabaseDriverType, err error) {
 	switch (t) {
 	case "sqlite3":
@@ -47,23 +56,29 @@ func databaseDriverTypeToString(t DatabaseDriverType) (ct string, err error) {
 	return
 }
 
-func createConnectionStringByDatabaseDriverType(t DatabaseDriverType, host, port, username, password, database string) string {
-	switch (t) {
-	case SQLITE3:
-		return host
-	case MYSQL:
-		return username +":" + password + "@" + host + ":" + port + "/" + database
-	case PG:
-		return "postgres://" + username + ":" + password + "@" +
-			host + ":" + port + " /" + database + "?sslmode=verify-full"
+func createConnectionStringByConnectionOptions(co ConnectionOptions) (cstr string, err error) {
+	t, err := databaseDriverTypeStringToInt(co.Driver)
+
+	if err != nil {
+		return
 	}
 
-	return ""
+	switch (t) {
+	case SQLITE3:
+		cstr = co.Host
+	case MYSQL:
+		cstr = co.Username + ":" + co.Password + "@" + co.Host + ":" + co.Port + "/" + co.Database
+	case PG:
+		cstr = "postgres://" + co.Username + ":" + co.Password + "@" +
+			co.Host + ":" + co.Port + " /" + co.Database + "?sslmode=verify-full"
+	}
+
+	return
 }
 
-func connectToDatabaseServer(dbType, host, port, username, password, database string) (db *sql.DB, err error) {
+func connectToDatabaseServer(co ConnectionOptions) (db *sql.DB, err error) {
 
-	t, err := databaseDriverTypeStringToInt(dbType)
+	t, err := databaseDriverTypeStringToInt(co.Driver)
 
 	if err != nil {
 		return
@@ -75,9 +90,15 @@ func connectToDatabaseServer(dbType, host, port, username, password, database st
 		return
 	}
 
+	cstr, err := createConnectionStringByConnectionOptions(co)
+
+	if err != nil {
+		return
+	}
+
 	db, err = sql.Open(
 		sqlDriverName,
-		createConnectionStringByDatabaseDriverType(t, host, port, username, password, database),
+		cstr,
 	)
 	return
 }
